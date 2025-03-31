@@ -7,15 +7,23 @@
         <label for="EventName">Event Name</label>
         <input type="text" class="form-control" id="EventName" name="EventName" required />
     </div>
+
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <input type="text" class="form-control" id="Description" name="Description" required />
+    </div>
+
     <div class="form-group">
         <label for="EventDate">Event Date</label>
         <input type="date" class="form-control" id="EventDate" name="EventDate" required />
     </div>
+
     <div class="form-group">
         <label for="VenueId">Venue</label>
         <select class="form-control" asp-items="@(ViewBag.Venues != null ? new SelectList(ViewBag.Venues, "VenueId", "VenueName") : new SelectList(Enumerable.Empty<SelectListItem>()))">
             <option value="">Select a Venue</option>
         </select>
     </div>
+
     <button type="submit" class="btn btn-success">Create</button>
 </form>
