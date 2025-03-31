@@ -1,0 +1,32 @@
+﻿@model IEnumerable<EventEase.Models.Event>
+
+<h2>Events</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary" aria-label="Create New Event">Create New Event</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Event Name</th>
+            <th>Event Date</th>
+            <th>Venue</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.EventName</td>
+                <td>@item.EventDate.ToShortDateString()</td>
+                <td>@item.Venue?.VenueName ?? "Unassigned"</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.EventId" class="btn btn-sm btn-warning" aria-label="Edit @item.EventName">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.EventId" class="btn btn-sm btn-danger" aria-label="Delete @item.EventName">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
