@@ -1,0 +1,31 @@
+﻿@model EventEase.Models.Venue
+
+<h2>Edit Venue</h2>
+
+<form asp-action="Edit" enctype="multipart/form-data">
+    <input type="hidden" asp-for="VenueId" />
+
+    <div class="form-group">
+        <label for="Name">Venue Name</label>
+        <input asp-for="VenueName" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Location">Location</label>
+        <input asp-for="Location" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Capacity">Capacity</label>
+        <input asp-for="Capacity" type="number" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label>Current Image</label><br />
+        <img src="@Model.ImageUrl" class="img-thumbnail" style="width: 200px;" />
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
