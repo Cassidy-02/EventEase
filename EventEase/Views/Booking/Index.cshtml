@@ -1,0 +1,33 @@
+﻿@model IEnumerable<EventEase.Models.Booking>
+
+<h2>Bookings</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary" aria-label="Create New Event">Create New Event</a>
+</p>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Event</th>
+            <th>Venue</th>
+            <th>Booking Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model ?? new List<Booking>())
+        {
+            <tr>
+                <td>@item.Event?.EventName ?? "N/A"</td>
+                <td>@item.Venue?.VenueName ?? "N/A"</td>
+                <td>@item.BookingDate? .ToShortDateString() ?? "N/A" </td>
+                <td>
+                    <a asp-action="Delete" asp-route-id="@item.BookingId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
