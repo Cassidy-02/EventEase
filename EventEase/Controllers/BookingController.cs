@@ -1,10 +1,12 @@
-﻿using EventEase.Models;
+﻿using EventEase.Data;
+using EventEase.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventEase.Controllers
 {
+    
     public class BookingController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -13,10 +15,13 @@ namespace EventEase.Controllers
         {
             _context = context;
         }
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var bookings = _context.Bookings.Include(b => b.EventId).Include(b => b.Venue);
-            return View(await bookings.ToListAsync());
+            var bookings = _context.Bookings
+                .Include(b => b.Event)
+                .Include(b => b.Venue)
+                .ToList(); 
+            return View(bookings);
         }
 
         public IActionResult Create()
@@ -36,7 +41,7 @@ namespace EventEase.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName", booking.EventId);
+            ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName", booking.Event);
             ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName", booking.VenueId);
             return View(booking);
         }
@@ -46,7 +51,7 @@ namespace EventEase.Controllers
         {
             if (id == null) return NotFound();
 
-            var booking = await _context.Bookings.Include(b => b.EventId).Include(b => b.Venue).FirstOrDefaultAsync(m => m.BookingId == id);
+            var booking = await _context.Bookings.Include(b => b.Event).Include(b => b.Venue).FirstOrDefaultAsync(m => m.BookingId == id);
             if (booking == null) return NotFound();
 
             return View(booking);

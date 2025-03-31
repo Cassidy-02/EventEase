@@ -1,10 +1,13 @@
-﻿using EventEase.Models;
+﻿using EventEase.Data;
+using EventEase.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventEase.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class EventController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -15,12 +18,13 @@ namespace EventEase.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var events = _context.Events.Include(e => e.Venue);
-            return View(await _context.Events.ToListAsync());
+            var events = await _context.Events.Include(e => e.Venue).ToListAsync();
+            return View(events);
         }
+
         public IActionResult Create()
         {
-            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName");
+            ViewBag.VenueId = new SelectList(_context.Venues, "VenueId", "VenueName");
             return View();
         }
 
@@ -34,7 +38,7 @@ namespace EventEase.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName", evt.VenueId);
+            ViewBag.VenueId = new SelectList(_context.Venues, "VenueId", "VenueName", evt.VenueId);
             return View(evt);
         }
 
@@ -42,10 +46,10 @@ namespace EventEase.Controllers
         {
             if (id == null) return NotFound();
 
-            var evt = await _context.Venues.FindAsync(id);
+            var evt = await _context.Events.FindAsync(id);
             if (evt == null) return NotFound();
 
-            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName", evt.VenueId);
+            ViewBag.VenueId = new SelectList(_context.Venues, "VenueId", "VenueName", evt.VenueId);
             return View(evt);
         }
 
@@ -53,14 +57,29 @@ namespace EventEase.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Event evt)
         {
-            if (id != evt.VenueId) return NotFound();
+            if (id != evt.EventId) return NotFound();
 
             if (ModelState.IsValid)
             {
-                _context.Update(evt);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    _context.Update(evt);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!EventExists(evt.EventId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.VenueId = new SelectList(_context.Venues, "VenueId", "VenueName", evt.VenueId);
             return View(evt);
         }
 
@@ -68,7 +87,9 @@ namespace EventEase.Controllers
         {
             if (id == null) return NotFound();
 
-            var evt = await _context.Events.Include(e => e.Venue).FirstOrDefaultAsync(m => m.EventId == id);
+            var evt = await _context.Events
+                .Include(e => e.Venue)
+                .FirstOrDefaultAsync(m => m.EventId == id);
             if (evt == null) return NotFound();
 
             return View(evt);
@@ -82,6 +103,11 @@ namespace EventEase.Controllers
             _context.Events.Remove(evt);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private bool EventExists(int id)
+        {
+            return _context.Events.Any(e => e.EventId == id);
         }
     }
    
