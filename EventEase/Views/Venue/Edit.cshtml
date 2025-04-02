@@ -1,31 +1,39 @@
 ﻿@model EventEase.Models.Venue
 
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
 <h2>Edit Venue</h2>
 
-<form asp-action="Edit" enctype="multipart/form-data">
-    <input type="hidden" asp-for="VenueId" />
+@using (Html.BeginForm("Edit", "Venue", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
 
     <div class="form-group">
-        <label for="Name">Venue Name</label>
-        <input asp-for="VenueName" class="form-control" required />
+        @Html.LabelFor(m => m.VenueName, "Venue Name")
+        @Html.TextBoxFor(m => m.VenueName, new { @class = "form-control", placeholder = "Enter venue name" })
     </div>
 
     <div class="form-group">
-        <label for="Location">Location</label>
-        <input asp-for="Location" class="form-control" required />
+        @Html.LabelFor(m => m.Location, "Location")
+        @Html.TextBoxFor(m => m.Location, new { @class = "form-control", placeholder = "Enter venue location" })
     </div>
 
     <div class="form-group">
-        <label for="Capacity">Capacity</label>
-        <input asp-for="Capacity" type="number" class="form-control" required />
+        @Html.LabelFor(m => m.Capacity, "Capacity")
+        @Html.TextBoxFor(m => m.Capacity, new { @class = "form-control", placeholder = "Enter venue capacity" })
     </div>
 
     <div class="form-group">
-        <label>Current Image</label><br />
-        <img src="@Model.ImageUrl" class="img-thumbnail" style="width: 200px;" />
+        <label for="ImageFile">Venue Image</label>
+        <input type="file" id="ImageFile" name="ImageFile" class="form-control-file" />
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <p>Current Image: <img src="@Url.Content(Model.ImageUrl)" alt="Venue Image" width="100" /></p>
+        }
     </div>
-
 
     <button type="submit" class="btn btn-primary">Save Changes</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+    <a href="@Url.Action("Display", "Venue")" class="btn btn-secondary">Cancel</a>
+}

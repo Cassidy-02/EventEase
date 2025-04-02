@@ -1,23 +1,35 @@
 ﻿@model EventEase.Models.Venue
 
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
 <h2>Create Venue</h2>
 
-<form asp-action="Create">
+@using (Html.BeginForm("Create", "Venue", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
     <div class="form-group">
-        <label for="VenueName">Venue Name</label>
-        <input type="text" class="form-control" id="VenueName" name="VenueName" required />
+        @Html.LabelFor(m => m.VenueName, "Venue Name")
+        @Html.TextBoxFor(m => m.VenueName, new { @class = "form-control", placeholder = "Enter venue name" })
     </div>
+
     <div class="form-group">
-        <label for="Location">Location</label>
-        <input type="text" class="form-control" id="Location" name="Location" required />
+        @Html.LabelFor(m => m.Location, "Location")
+        @Html.TextBoxFor(m => m.Location, new { @class = "form-control", placeholder = "Enter venue location" })
     </div>
+
     <div class="form-group">
-        <label for="Capacity">Capacity</label>
-        <input type="number" class="form-control" id="Capacity" name="Capacity" required />
+        @Html.LabelFor(m => m.Capacity, "Capacity")
+        @Html.TextBoxFor(m => m.Capacity, new { @class = "form-control", placeholder = "Enter venue capacity" })
     </div>
+
     <div class="form-group">
-        <label for="ImageFile">Upload Image</label>
-        <input type="file" class="form-control" id="ImageUrl" name="ImageFile" accept="image" required />
+        <label for="ImageFile">Venue Image</label>
+        <input type="file" id="ImageFile" name="ImageFile" class="form-control-file" />
     </div>
-    <button type="submit" class="btn btn-success">Create</button>
-</form>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="@Url.Action("Display", "Venue")" class="btn btn-secondary">Cancel</a>
+}

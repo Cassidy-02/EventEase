@@ -1,0 +1,67 @@
+﻿@model IEnumerable<EventEase.Models.Venue>
+
+@{
+    ViewData["Title"] = "Venues";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Venues</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Venue</a>
+
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.VenueName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Capacity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImageUrl)
+            </th>
+            <th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            int index = 1;   
+            foreach (var venue in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => venue.VenueName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => venue.Location)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => venue.Capacity)
+                    </td>
+                    <td>
+                        <img src="@venue.ImageUrl" alt="Venue Image" width="100" />
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Edit", "Venue", new { id = venue.VenueId })" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="@Url.Action("Delete", "Venue", new { id = venue.VenueId })" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                index++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">No venues available.</td>
+            </tr>
+        }
+    </tbody>
+</table>
