@@ -17,7 +17,7 @@ namespace EventEase.Controllers
         }
         public IActionResult Index()
         {
-            var bookings = _context.Bookings
+            var bookings = _context.Booking
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
                 .ToList(); 
@@ -26,8 +26,8 @@ namespace EventEase.Controllers
 
         public IActionResult Create()
         {
-            ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName");
-            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName");
+           ViewBag.VenueList = _context.Venue.ToList();
+            ViewBag.EventList = _context.Event.ToList();
             return View();
         }
 
@@ -41,17 +41,52 @@ namespace EventEase.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName", booking.Event);
-            ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName", booking.VenueId);
+            ViewData["EventId"] = new SelectList(_context.Event, "EventId", "EventName", booking.Event);
+            ViewData["VenueId"] = new SelectList(_context.Venue, "VenueId", "VenueName", booking.VenueId);
             return View(booking);
         }
+
+        [HttpGet]
+        public ActionResult Edit(int id)
+        {
+            var booking = _context.Booking.Find(id);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.EventList = _context.Event.ToList();
+            ViewBag.VenueList = _context.Venue.ToList();
+
+            return View(booking);
+        }
+
+       
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(Booking booking)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Entry(booking).State = EntityState.Modified; 
+                _context.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.EventList = _context.Event.ToList();
+            ViewBag.VenueList = _context.Venue.ToList();
+
+            return View(booking);
+        }
+
 
         // GET: Bookings/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
-            var booking = await _context.Bookings.Include(b => b.Event).Include(b => b.Venue).FirstOrDefaultAsync(m => m.BookingId == id);
+            var booking = await _context.Booking.Include(b => b.Event).Include(b => b.Venue).FirstOrDefaultAsync(m => m.BookingId == id);
             if (booking == null) return NotFound();
 
             return View(booking);
@@ -62,8 +97,8 @@ namespace EventEase.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
-            _context.Bookings.Remove(booking);
+            var booking = await _context.Booking.FindAsync(id);
+            _context.Booking.Remove(booking);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

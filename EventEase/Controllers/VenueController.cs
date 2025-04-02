@@ -1,8 +1,11 @@
-﻿using EventEase.Data;
+﻿using DocumentFormat.OpenXml.Vml;
+using EventEase.Data;
 using EventEase.Models;
+using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Path = System.IO.Path;
 
 
 namespace EventEase.Controllers
@@ -11,15 +14,17 @@ namespace EventEase.Controllers
     public class VenueController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public VenueController(ApplicationDbContext context)
+        public VenueController(ApplicationDbContext context, IWebHostEnvironment hostingEnvironment)
         {
             _context = context;
+            _hostingEnvironment = hostingEnvironment;
         }
 
-        public IActionResult Index()
+        public IActionResult Display()
         {
-            var venues = _context.Venues.ToList(); // Retrieve all venues asynchronously
+            var venues = _context.Venue.ToList(); // Retrieve all venues asynchronously
             return View(venues);
         }
 
@@ -29,25 +34,39 @@ namespace EventEase.Controllers
             return View(); // Return the view for creating a new venue
         }
 
+        // Replace HttpPostedFileBase with IFormFile in the Create method
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("VenueId, VenueName, Location, Capacity, ImageUrl")] Venue venue, IFormFile ImageFile)
         {
-            if (ModelState.IsValid)
-            {
-                venue.ImageUrl = await HandleImageUploadAsync(ImageFile); // Handle image upload
 
-                _context.Venues.Add(venue); // Add the venue to the database
+            if (ModelState.IsValid)
+
+            {
+                if (ImageFile != null && ImageFile.Length > 0)
+                {
+                    string fileName = Path.GetFileName(ImageFile.FileName);
+                    string uploadsFolder = Path.Combine(_hostingEnvironment.WebRootPath, "Images/Venues");
+                    string filePath = Path.Combine(uploadsFolder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ImageFile.CopyToAsync(stream);
+                    }
+                    venue.ImageUrl = "/Images/Venues/" + fileName;
+                }
+
+                _context.Venue.Add(venue); // Add the venue to the database
                 await _context.SaveChangesAsync(); // Save changes asynchronously
-                return RedirectToAction("Index"); // Redirect to the Index action
+                return RedirectToAction("Display"); // Redirect to the Index action
             }
+
             return View(venue); // Redisplay the form if validation fails
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var venue = await _context.Venues.FindAsync(id); // Retrieve the venue with the specified id asynchronously
+            var venue = await _context.Venue.FindAsync(id); // Retrieve the venue with the specified id asynchronously
             if (venue == null)
             {
                 return NotFound(); // Return a 404 Not Found error if the venue is not found
@@ -84,7 +103,7 @@ namespace EventEase.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index)); // Redirect to the Index action
+                return RedirectToAction("Display"); // Redirect to the Index action
             }
             return View(venue); // Redisplay the form if validation fails
         }
@@ -92,40 +111,33 @@ namespace EventEase.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return BadRequest(); // Return 400 Bad Request if id is null
-            }
-
-            var venue = await _context.Venues
-                .FirstOrDefaultAsync(m => m.VenueId == id); // Retrieve the venue by ID asynchronously
+            var venue = _context.Venue.FindAsync(id); // Find the venue by ID
             if (venue == null)
             {
-                return NotFound(); // Return 404 error if not found
+                return NotFound(); // Return a 404 error if not found
             }
-
-            return View(venue); // Return the delete confirmation view
+            return View(venue); // Pass the venue model to the Delete view
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var venue = await _context.Venues.FindAsync(id); // Retrieve the venue by ID asynchronously
+            var venue = await _context.Venue.FindAsync(id); // Retrieve the venue by ID asynchronously
             if (venue != null)
             {
-                _context.Venues.Remove(venue); // Remove the venue from the database
+                _context.Venue.Remove(venue); // Remove the venue from the database
                 await _context.SaveChangesAsync(); // Save changes asynchronously
             }
-            return RedirectToAction(nameof(Index)); // Redirect to the Index action
+            return RedirectToAction("Display"); // Redirect to the Index action
         }
 
-        private async Task<string> HandleImageUploadAsync(IFormFile ImageFile)
+        private async Task<string?> HandleImageUploadAsync(IFormFile ImageFile)
         {
             if (ImageFile != null && ImageFile.Length > 0)
             {
                 string filename = Path.GetFileName(ImageFile.FileName);
-                string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", "Venues", filename);
+                string path = Path.Combine(_hostingEnvironment.WebRootPath, "Images", "Venues", filename);
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
                     await ImageFile.CopyToAsync(stream); // Copy the file asynchronously
@@ -137,7 +149,7 @@ namespace EventEase.Controllers
 
         private bool VenueExists(int id)
         {
-            return _context.Venues.Any(e => e.VenueId == id);
+            return _context.Venue.Any(e => e.VenueId == id);
         }
     }
 }
