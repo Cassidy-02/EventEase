@@ -1,25 +1,30 @@
 ﻿@model EventEase.Models.Booking
 
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
 <h2>Create Booking</h2>
 
-<form asp-action="Create">
+@using (Html.BeginForm("Create", "Booking", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
     <div class="form-group">
-        <label for="EventId">Event</label>
-        <select class="form-control" asp-items="@(ViewBag.Venues != null ? new SelectList(ViewBag.Venues, "EventId", "EvenetName") : new SelectList(Enumerable.Empty<SelectListItem>()))">
-           
-                <option value="">Event</option>
-            
-        </select>
+        @Html.LabelFor(m => m.BookingDate, "Booking Date")
+        @Html.TextBoxFor(m => m.BookingDate, new { @class = "form-control", type = "datetime-local", placeholder = "Select booking date" })
     </div>
+
     <div class="form-group">
-        <label for="VenueId">Venue</label>
-        <select class="form-control" asp-items="@(ViewBag.Venues != null ? new SelectList(ViewBag.Venues, "VenueId", "VenueName") : new SelectList(Enumerable.Empty<SelectListItem>()))">
-            <option value="">Select a Venue</option>
-        </select>
+        @Html.LabelFor(m => m.EventId, "Event")
+        @Html.DropDownListFor(m => m.EventId, new SelectList(ViewBag.Events, "EventId", "EventName"), "Select Event", new { @class = "form-control" })
     </div>
+
     <div class="form-group">
-        <label for="BookingDate">Booking Date</label>
-        <input type="date" class="form-control" id="BookingDate" name="BookingDate" required />
+        @Html.LabelFor(m => m.VenueId, "Venue")
+        @Html.DropDownListFor(m => m.VenueId, new SelectList(ViewBag.Venues, "VenueId", "VenueName"), "Select Venue", new { @class = "form-control" })
     </div>
-    <button type="submit" class="btn btn-success">Create</button>
-</form>
+
+    <button type="submit" class="btn btn-primary">Submit Booking</button>
+    <a href="@Url.Action("Index", "Booking")" class="btn btn-secondary">Cancel</a>
+}

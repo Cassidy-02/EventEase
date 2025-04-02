@@ -1,15 +1,15 @@
 ﻿@model IEnumerable<EventEase.Models.Booking>
 
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
 <h2>Bookings</h2>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary" aria-label="Create New Event">Create New Event</a>
-</p>
-
-
-<table class="table">
+<table class="table table-bordered">
     <thead>
         <tr>
+            <th>#</th>
             <th>Event</th>
             <th>Venue</th>
             <th>Booking Date</th>
@@ -17,17 +17,32 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model ?? new List<Booking>())
+        @if (Model != null && Model.Any())
+        {
+            int index = 1;
+            foreach (var booking in Model)
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@booking.Event?.EventName</td>
+                    <td>@booking.Venue?.VenueName</td>
+                    <td>@booking.BookingDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        @Html.ActionLink("Edit", "Edit", new { id = booking.BookingId }, new { @class = "btn btn-primary btn-sm" }) |
+                        @Html.ActionLink("Delete", "Delete", new { id = booking.BookingId }, new { @class = "btn btn-danger btn-sm" })
+                    </td>
+                </tr>
+                index++;
+            }
+        }
+        else
         {
             <tr>
-                <td>@item.Event?.EventName ?? "N/A"</td>
-                <td>@item.Venue?.VenueName ?? "N/A"</td>
-                <td>@item.BookingDate? .ToShortDateString() ?? "N/A" </td>
-                <td>
-                    <a asp-action="Delete" asp-route-id="@item.BookingId">Delete</a>
-                </td>
+                <td colspan="5" class="text-center">No bookings found.</td>
             </tr>
         }
     </tbody>
 </table>
+
+<a href="@Url.Action("Create", "Booking")" class="btn btn-success">Create New Booking</a>
 

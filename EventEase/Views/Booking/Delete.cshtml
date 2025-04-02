@@ -1,5 +1,21 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model EventEase.Models.Booking
+
 @{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Delete Booking</h2>
+
+<p>Are you sure you want to delete this booking?</p>
+<p>
+    <strong>Event:</strong> @Model.Event.EventName <br />
+    <strong>Venue:</strong> @Model.Venue.VenueName <br />
+    <strong>Date:</strong> @Model.BookingDate.ToString("yyyy-MM-dd HH:mm")
+</p>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="@Url.Action("Index", "Booking")" class="btn btn-secondary">Cancel</a>
 }
