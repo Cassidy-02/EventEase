@@ -1,30 +1,36 @@
 ﻿@model EventEase.Models.Event
 
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
 <h2>Edit Event</h2>
 
-<form asp-action="Edit" enctype="multipart/form-data">
-    <input type="hidden" asp-for="EventId" />
+@using (Html.BeginForm("Edit", "Event", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
 
     <div class="form-group">
-        <label for="Name">Event Name</label>
-        <input asp-for="EventName" class="form-control" required />
+        @Html.LabelFor(m => m.EventName, "Event Name")
+        @Html.TextBoxFor(m => m.EventName, new { @class = "form-control", placeholder = "Enter event name" })
     </div>
 
     <div class="form-group">
-        <label for="Description">Description</label>
-        <input asp-for="Description" class="form-control" required />
+        @Html.LabelFor(m => m.EventDate, "Event Date")
+        @Html.TextBoxFor(m => m.EventDate, new { @class = "form-control", type = "date" })
     </div>
 
     <div class="form-group">
-        <label for="EventDate">EventDate</label>
-        <input asp-for="EventDate" class="form-control" required />
+        @Html.LabelFor(m => m.Description, "Description")
+        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", placeholder = "Enter event description" })
     </div>
 
     <div class="form-group">
-        <label for="Venue">Venue</label>
-        <input asp-for="Venue" class="form-control" required />
+        @Html.LabelFor(m => m.VenueId, "Venue")
+        @Html.DropDownListFor(m => m.VenueId, new SelectList(ViewBag.Venues, "VenueId", "VenueName"), "Select Venue", new { @class = "form-control" })
     </div>
 
     <button type="submit" class="btn btn-primary">Save Changes</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+    <a href="@Url.Action("Index", "Event")" class="btn btn-secondary">Cancel</a>
+}
+
