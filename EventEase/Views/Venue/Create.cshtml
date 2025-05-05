@@ -13,23 +13,27 @@
     <div class="form-group">
         @Html.LabelFor(m => m.VenueName, "Venue Name")
         @Html.TextBoxFor(m => m.VenueName, new { @class = "form-control", placeholder = "Enter venue name" })
+        @Html.ValidationMessageFor(m => m.VenueName, "", new { @class = "text-danger" })
     </div>
 
     <div class="form-group">
         @Html.LabelFor(m => m.Location, "Location")
         @Html.TextBoxFor(m => m.Location, new { @class = "form-control", placeholder = "Enter venue location" })
+        @Html.ValidationMessageFor(m => m.Location, "", new { @class = "text-danger" })
     </div>
 
     <div class="form-group">
         @Html.LabelFor(m => m.Capacity, "Capacity")
         @Html.TextBoxFor(m => m.Capacity, new { @class = "form-control", placeholder = "Enter venue capacity" })
+        @Html.ValidationMessageFor(m => m.Capacity, "", new { @class = "text-danger" })
     </div>
 
     <div class="form-group">
         <label for="ImageFile">Venue Image</label>
-        <input type="file" id="ImageFile" name="ImageFile" class="form-control-file" />
+        <input type="file" id="imageFile" name="imageFile" class="form-control-file" />
+        @Html.ValidationMessage("ImageFile", new { @class = "text-danger" })
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
+    <input type="submit" value="Save Venue" class="btn btn-primary" />
     <a href="@Url.Action("Display", "Venue")" class="btn btn-secondary">Cancel</a>
 }

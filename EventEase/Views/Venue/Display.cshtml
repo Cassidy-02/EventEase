@@ -47,7 +47,9 @@
                         @Html.DisplayFor(modelItem => venue.Capacity)
                     </td>
                     <td>
+                        @if (!string.IsNullOrEmpty(venue.ImageUrl)){
                         <img src="@venue.ImageUrl" alt="Venue Image" width="100" />
+                        }
                     </td>
                     <td>
                         <a href="@Url.Action("Edit", "Venue", new { id = venue.VenueId })" class="btn btn-primary btn-sm">Edit</a>
