@@ -19,20 +19,19 @@
     <tbody>
         @if (Model != null && Model.Any())
         {
-            int index = 1;
-            foreach (var booking in Model)
+            for (int i = 0; i < Model.Count(); i++)
             {
+                var booking = Model.ElementAt(i);
                 <tr>
-                    <td>@index</td>
+                    <td>@(i + 1)</td>
                     <td>@booking.Event?.EventName</td>
                     <td>@booking.Venue?.VenueName</td>
-                    <td>@booking.BookingDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@booking.BookingDate?.ToString("yyyy-MM-dd HH:mm")</td>
                     <td>
-                        @Html.ActionLink("Edit", "Edit", new { id = booking.BookingId }, new { @class = "btn btn-primary btn-sm" }) |
-                        @Html.ActionLink("Delete", "Delete", new { id = booking.BookingId }, new { @class = "btn btn-danger btn-sm" })
+                        <a asp-action="Edit" asp-route-id="@booking.BookingId" class="btn btn-primary btn-sm" aria-label="Edit Booking">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@booking.BookingId" class="btn btn-danger btn-sm" aria-label="Delete Booking">Delete</a>
                     </td>
                 </tr>
-                index++;
             }
         }
         else
@@ -44,5 +43,4 @@
     </tbody>
 </table>
 
-<a href="@Url.Action("Create", "Booking")" class="btn btn-success">Create New Booking</a>
-
+<a asp-action="Create" class="btn btn-success">Create New Booking</a>

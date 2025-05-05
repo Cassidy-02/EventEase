@@ -10,7 +10,7 @@
 <p>
     <strong>Event:</strong> @Model.Event.EventName <br />
     <strong>Venue:</strong> @Model.Venue.VenueName <br />
-    <strong>Date:</strong> @Model.BookingDate.ToString("yyyy-MM-dd HH:mm")
+    <strong>Date:</strong> @(Model.BookingDate?.ToString("yyyy-MM-dd HH:mm") ?? "N/A")
 </p>
 
 @using (Html.BeginForm())

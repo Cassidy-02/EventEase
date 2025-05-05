@@ -10,21 +10,30 @@
 {
     @Html.AntiForgeryToken()
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.BookingDate, "Booking Date")
-        @Html.TextBoxFor(m => m.BookingDate, new { @class = "form-control", type = "datetime-local", placeholder = "Select booking date" })
+    <!-- Validation Summary -->
+    @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.BookingDate, "Booking Date", new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.BookingDate, new { @class = "form-control", type = "datetime-local", placeholder = "Select booking date", aria_describedby = "BookingDateError" })
+        @Html.ValidationMessageFor(m => m.BookingDate, "", new { @id = "BookingDateError", @class = "text-danger" })
     </div>
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.EventId, "Event")
-        @Html.DropDownListFor(m => m.EventId, new SelectList(ViewBag.Events, "EventId", "EventName"), "Select Event", new { @class = "form-control" })
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.EventId, "Event", new { @class = "form-label" })
+        @Html.DropDownListFor(m => m.EventId, Model.Events, "Select Event", new { @class = "form-control", aria_describedby = "EventIdError" })
+        @Html.ValidationMessageFor(m => m.EventId, "", new { @id = "EventIdError", @class = "text-danger" })
     </div>
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.VenueId, "Venue")
-        @Html.DropDownListFor(m => m.VenueId, new SelectList(ViewBag.Venues, "VenueId", "VenueName"), "Select Venue", new { @class = "form-control" })
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.VenueId, "Venue", new { @class = "form-label" })
+        @Html.DropDownListFor(m => m.VenueId, Model.Venues, "Select Venue", new { @class = "form-control", aria_describedby = "VenueIdError" })
+        @Html.ValidationMessageFor(m => m.VenueId, "", new { @id = "VenueIdError", @class = "text-danger" })
     </div>
 
-    <button type="submit" class="btn btn-primary">Submit Booking</button>
-    <a href="@Url.Action("Index", "Booking")" class="btn btn-secondary">Cancel</a>
+    <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary">Submit Booking</button>
+        <a href="@Url.Action("Index", "Booking")" class="btn btn-secondary">Cancel</a>
+    </div>
 }
+
