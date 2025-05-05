@@ -13,6 +13,7 @@ namespace EventEase.Models
         public DateTime? BookingDate { get; set; }
         public required Event Event { get; set; }
         public required Venue Venue { get; set; }
+       
 
         [NotMapped]
         // Add these properties for dropdown lists
