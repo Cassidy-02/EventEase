@@ -18,23 +18,23 @@
         </tr>
     </thead>
     <tbody>
-        @if (Model != null && Model.Any())
-        {
-            int index = 1;
-            foreach (var eventItem in Model)
+            @foreach (var eventItem in Model)
             {
                 <tr>
-                    <td>@index</td>
+                  
                     <td>@eventItem.EventName</td>
                     <td>@eventItem.EventDate.ToString("yyyy-MM-dd")</td>
                     <td>@eventItem.Description</td>
                     <td>@eventItem.Venue?.VenueName</td>
                     <td>
+                        <select asp-for="@eventItem.VenueId" asp-items="@eventItem.Venues" class="form-control"></select>
+                    </td>
+                    <td>
                         @Html.ActionLink("Edit", "Edit", new { id = eventItem.EventId }, new { @class = "btn btn-primary btn-sm" }) |
                         @Html.ActionLink("Delete", "Delete", new { id = eventItem.EventId }, new { @class = "btn btn-danger btn-sm" })
                     </td>
                 </tr>
-                index++;
+               
             }
         }
         else
