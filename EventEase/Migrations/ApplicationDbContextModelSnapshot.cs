@@ -17,7 +17,7 @@ namespace EventEase.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -329,8 +329,9 @@ namespace EventEase.Migrations
             modelBuilder.Entity("EventEase.Models.Event", b =>
                 {
                     b.HasOne("EventEase.Models.Venue", "Venue")
-                        .WithMany()
-                        .HasForeignKey("VenueId");
+                        .WithMany("Events")
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Venue");
                 });
@@ -384,6 +385,11 @@ namespace EventEase.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("EventEase.Models.Venue", b =>
+                {
+                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }

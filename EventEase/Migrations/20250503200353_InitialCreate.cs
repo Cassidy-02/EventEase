@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EventEase.Migrations
 {
     /// <inheritdoc />
-    public partial class mssqlazure_migration_283 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,7 +51,7 @@ namespace EventEase.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Venues",
+                name: "Venue",
                 columns: table => new
                 {
                     VenueId = table.Column<int>(type: "int", nullable: false)
@@ -63,7 +63,7 @@ namespace EventEase.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Venues", x => x.VenueId);
+                    table.PrimaryKey("PK_Venue", x => x.VenueId);
                 });
 
             migrationBuilder.CreateTable(
@@ -173,7 +173,7 @@ namespace EventEase.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Events",
+                name: "Event",
                 columns: table => new
                 {
                     EventId = table.Column<int>(type: "int", nullable: false)
@@ -185,16 +185,17 @@ namespace EventEase.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Events", x => x.EventId);
+                    table.PrimaryKey("PK_Event", x => x.EventId);
                     table.ForeignKey(
-                        name: "FK_Events_Venues_VenueId",
+                        name: "FK_Event_Venue_VenueId",
                         column: x => x.VenueId,
-                        principalTable: "Venues",
-                        principalColumn: "VenueId");
+                        principalTable: "Venue",
+                        principalColumn: "VenueId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Bookings",
+                name: "Booking",
                 columns: table => new
                 {
                     BookingId = table.Column<int>(type: "int", nullable: false)
@@ -205,17 +206,17 @@ namespace EventEase.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Bookings", x => x.BookingId);
+                    table.PrimaryKey("PK_Booking", x => x.BookingId);
                     table.ForeignKey(
-                        name: "FK_Bookings_Events_EventId",
+                        name: "FK_Booking_Event_EventId",
                         column: x => x.EventId,
-                        principalTable: "Events",
+                        principalTable: "Event",
                         principalColumn: "EventId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Bookings_Venues_VenueId",
+                        name: "FK_Booking_Venue_VenueId",
                         column: x => x.VenueId,
-                        principalTable: "Venues",
+                        principalTable: "Venue",
                         principalColumn: "VenueId",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -260,18 +261,18 @@ namespace EventEase.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_EventId",
-                table: "Bookings",
+                name: "IX_Booking_EventId",
+                table: "Booking",
                 column: "EventId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_VenueId",
-                table: "Bookings",
+                name: "IX_Booking_VenueId",
+                table: "Booking",
                 column: "VenueId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Events_VenueId",
-                table: "Events",
+                name: "IX_Event_VenueId",
+                table: "Event",
                 column: "VenueId");
         }
 
@@ -294,7 +295,7 @@ namespace EventEase.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Bookings");
+                name: "Booking");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -303,10 +304,10 @@ namespace EventEase.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Events");
+                name: "Event");
 
             migrationBuilder.DropTable(
-                name: "Venues");
+                name: "Venue");
         }
     }
 }

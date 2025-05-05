@@ -5,7 +5,7 @@
 namespace EventEase.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIndentity : Migration
+    public partial class mssqlazure_migration_895 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

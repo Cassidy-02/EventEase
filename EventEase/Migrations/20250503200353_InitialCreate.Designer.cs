@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventEase.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250322205447_AddIndentity")]
-    partial class AddIndentity
+    [Migration("20250503200353_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -48,7 +48,7 @@ namespace EventEase.Migrations
 
                     b.HasIndex("VenueId");
 
-                    b.ToTable("Bookings");
+                    b.ToTable("Booking");
                 });
 
             modelBuilder.Entity("EventEase.Models.Event", b =>
@@ -77,7 +77,7 @@ namespace EventEase.Migrations
 
                     b.HasIndex("VenueId");
 
-                    b.ToTable("Events");
+                    b.ToTable("Event");
                 });
 
             modelBuilder.Entity("EventEase.Models.Venue", b =>
@@ -105,7 +105,7 @@ namespace EventEase.Migrations
 
                     b.HasKey("VenueId");
 
-                    b.ToTable("Venues");
+                    b.ToTable("Venue");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -332,8 +332,9 @@ namespace EventEase.Migrations
             modelBuilder.Entity("EventEase.Models.Event", b =>
                 {
                     b.HasOne("EventEase.Models.Venue", "Venue")
-                        .WithMany()
-                        .HasForeignKey("VenueId");
+                        .WithMany("Events")
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Venue");
                 });
@@ -387,6 +388,11 @@ namespace EventEase.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("EventEase.Models.Venue", b =>
+                {
+                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }
