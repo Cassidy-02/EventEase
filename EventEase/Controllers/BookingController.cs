@@ -183,5 +183,46 @@ namespace EventEase.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        //Booking Management
+        public async Task<IActionResult> BookingManagement(string search, string sortOrder, int page = 1)
+        {
+            int pageSize = 10; // Number of records per page
+
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.EventSort = String.IsNullOrEmpty(sortOrder) ? "event_desc" : "";
+            ViewBag.DateSort = sortOrder == "date" ? "date_desc" : "date";
+
+            var bookings = _context.Booking
+                .Include(b => b.Event)
+                .Include(b => b.Venue)
+                .AsQueryable();
+
+            if (!String.IsNullOrEmpty(search))
+            {
+                bookings = bookings.Where(b => 
+                b.Event.EventName.Contains(search) || 
+                b.Venue.VenueName.Contains(search));
+            }
+
+            //Sorting logic
+            bookings = sortOrder switch
+            {
+                "event_desc" => bookings.OrderByDescending(b => b.Event.EventName),
+                "date" => bookings.OrderBy(b => b.BookingDate),
+                "date_desc" => bookings.OrderByDescending(b => b.BookingDate),
+                _ => bookings.OrderBy(b => b.Event.EventName)
+            };
+
+            // Pagination logic
+            var count = await bookings.CountAsync();
+            var items = await bookings.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            ViewBag.TotalPages = (int)Math.Ceiling((double)count / pageSize);
+            ViewBag.CurrentPage = page;
+
+            return View(items);
+        }
     }
 }
