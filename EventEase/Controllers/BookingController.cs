@@ -1,5 +1,6 @@
 ﻿using EventEase.Data;
 using EventEase.Models;
+using EventEase.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -223,6 +224,46 @@ namespace EventEase.Controllers
             ViewBag.CurrentPage = page;
 
             return View(items);
+        }
+        public IActionResult Manage(string? search, string sortOrder, int page = 1)
+        {
+            var bookings = _context.Booking.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                bookings = bookings.Where(b => b.BookingId.ToString().Contains(search) ||
+                                               b.Event.EventName.Contains(search));
+            }
+
+            // Sorting logic (example)
+            switch (sortOrder)
+            {
+                case "EventName":
+                    bookings = bookings.OrderBy(b => b.Event.EventName);
+                    break;
+                case "Date":
+                    bookings = bookings.OrderBy(b => b.BookingDate);
+                    break;
+                default:
+                    bookings = bookings.OrderBy(b => b.BookingId);
+                    break;
+            }
+
+            // Pagination logic
+            int pageSize = 10;
+            var paginatedBookings = bookings.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var viewModel = new ManageBookingsViewModel
+            {
+                Search = search,
+                Bookings = paginatedBookings
+            };
+
+            ViewBag.TotalPages = (int)Math.Ceiling(bookings.Count() / (double)pageSize);
+            ViewBag.CurrentPage = page;
+            ViewBag.CurrentSort = sortOrder;
+
+            return View(viewModel);
         }
     }
 }
