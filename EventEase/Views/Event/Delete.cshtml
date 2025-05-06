@@ -24,10 +24,9 @@
     </dl>
 </div>
 
-@using (Html.BeginForm("DeleteConfirmed", "Event", FormMethod.Post))
+@using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    @Html.HiddenFor(model => model.EventId)
 
     <div class="mt-4 d-flex justify-content-between">
         <input type="submit" value="Delete" class="btn btn-danger" />
