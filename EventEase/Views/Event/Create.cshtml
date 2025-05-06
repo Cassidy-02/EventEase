@@ -29,17 +29,12 @@
     </div>
 
     <div class="form-group">
-        @Html.LabelFor(m => m.VenueId, "Venue")
-        @Html.DropDownListFor(
-            m => m.VenueId,
-            ViewBag.Venues != null ? new SelectList(ViewBag.Venues, "VenueId", "VenueName") : new SelectList(Enumerable.Empty<SelectListItem>()),
-            "Select Venue",
-            new { @class = "form-control" }
-        )
-        @Html.ValidationMessageFor(m => m.VenueId, "", new { @class = "text-danger" })
+        @Html.LabelFor(m => m.VenueId, "Venue", new { @class = "form-label" })
+        @Html.DropDownListFor(m => m.VenueId, Model.Venues, "Select Venue", new { @class = "form-control", aria_describedby = "VenueIdError" })
+        @Html.ValidationMessageFor(m => m.VenueId, "", new { @id = "VenueIdError", @class = "text-danger" })
     </div>
 
     <button type="submit" class="btn btn-primary">Create Event</button>
-    <a href="@Url.Action("Display", "Event")" class="btn btn-secondary">Cancel</a>
+    <a href="@Url.Action("Index", "Event")" class="btn btn-secondary">Cancel</a>
 }
 

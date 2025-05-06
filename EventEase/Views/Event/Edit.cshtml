@@ -9,6 +9,7 @@
 @using (Html.BeginForm("Edit", "Event", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.EventId)
 
     <div class="form-group">
         @Html.LabelFor(m => m.EventName, "Event Name")
@@ -27,7 +28,7 @@
 
     <div class="form-group">
         @Html.LabelFor(m => m.VenueId, "Venue")
-        @Html.DropDownListFor(m => m.VenueId, new SelectList(ViewBag.Venues, "VenueId", "VenueName"), "Select Venue", new { @class = "form-control" })
+        @Html.DropDownListFor(m => m.VenueId,Model.Venues ?? new List<SelectListItem>(), "Select Venue", new { @class = "form-control" })
     </div>
 
     <button type="submit" class="btn btn-primary">Save Changes</button>

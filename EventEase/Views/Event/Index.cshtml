@@ -9,7 +9,7 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>#</th>
+
             <th>Event Name</th>
             <th>Event Date</th>
             <th>Description</th>
@@ -18,10 +18,10 @@
         </tr>
     </thead>
     <tbody>
-            @foreach (var eventItem in Model)
-            {
-                <tr>
-                  
+        @foreach (var eventItem in Model)
+        {
+            <tr>
+
                     <td>@eventItem.EventName</td>
                     <td>@eventItem.EventDate.ToString("yyyy-MM-dd")</td>
                     <td>@eventItem.Description</td>
@@ -34,16 +34,10 @@
                         @Html.ActionLink("Delete", "Delete", new { id = eventItem.EventId }, new { @class = "btn btn-danger btn-sm" })
                     </td>
                 </tr>
+                }
                
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="6" class="text-center">No events found.</td>
-            </tr>
-        }
     </tbody>
 </table>
 
 <a href="@Url.Action("Create", "Event")" class="btn btn-success">Create New Event</a>
+
