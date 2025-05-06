@@ -19,7 +19,7 @@ namespace EventEase.Controllers
         // GET: Bookings
         public async Task<IActionResult> Index()
         {
-            Console.WriteLine("Index action hit"); // Will show in terminal/console
+           
             var bookings = await _context.Booking
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
@@ -33,29 +33,25 @@ namespace EventEase.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            var booking = new Booking
-            {
-                Event = new Event(), // Initialize required member 'Event'
-                Venue = new Venue
-                {
-                    VenueName = "Default Venue Name", // Set required member 'VenueName'
-                    Location = "Default Location",   // Set required member 'Location'
-                    ImageUrl = "DefaultImageUrl.jpg", // Set required member 'ImageUrl'
-                   
-                },
-                Events = _context.Event.Select(e => new SelectListItem
-                {
-                    Value = e.EventId.ToString(),
-                    Text = e.EventName
-                }).ToList(),
-                Venues = _context.Venue.Select(v => new SelectListItem
-                {
-                    Value = v.VenueId.ToString(),
-                    Text = v.VenueName
-                }).ToList()
-            };
+            
+             var booking = new Booking
+             {
+                 Event = new Event(),
+                 Venue = new Venue(),
 
-            return View(booking); // Ensure this maps to Views/Booking/Create.cshtml
+                 Events = _context.Event.Select(e => new SelectListItem
+                 {
+                     Value = e.EventId.ToString(),
+                     Text = e.EventName
+                 }).ToList(),
+                 Venues = _context.Venue.Select(v => new SelectListItem
+                 {
+                     Value = v.VenueId.ToString(),
+                     Text = v.VenueName
+                 }).ToList()
+             };
+
+             return View(booking);
         }
 
         [HttpPost]
@@ -63,7 +59,7 @@ namespace EventEase.Controllers
         public async Task<IActionResult> Create(Booking booking)
         {
             if (ModelState.IsValid)
-            {
+            { 
                 // Check for double booking
                 var isDoubleBooked = _context.Booking.Any(b =>
                     b.VenueId == booking.VenueId &&
@@ -78,7 +74,7 @@ namespace EventEase.Controllers
 
                     _context.Add(booking);
                     await _context.SaveChangesAsync();
-                    return Redirect("/Booking/Index"); // Ensure this redirects to the Index action
+                    return RedirectToAction("Index"); // Ensure this redirects to the Index action
                 }
             }
 
@@ -132,13 +128,23 @@ namespace EventEase.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Booking booking)
+        public async Task<IActionResult> Edit(Booking booking)
         {
             if (ModelState.IsValid)
             {
-                _context.Entry(booking).State = EntityState.Modified;
-                _context.SaveChanges();
-                return RedirectToAction("Index");
+                try
+                {
+                    _context.Update(booking);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index");
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Booking.Any(b => b.BookingId == booking.BookingId))
+                        return NotFound();
+                    else
+                        throw;
+                }
             }
 
             // Reload dropdown data in case of validation failure
@@ -186,63 +192,38 @@ namespace EventEase.Controllers
         }
 
         //Booking Management
-        public async Task<IActionResult> BookingManagement(string search, string sortOrder, int page = 1)
-        {
-            int pageSize = 10; // Number of records per page
-
-            ViewBag.CurrentSearch = search;
-            ViewBag.CurrentSort = sortOrder;
-            ViewBag.EventSort = String.IsNullOrEmpty(sortOrder) ? "event_desc" : "";
-            ViewBag.DateSort = sortOrder == "date" ? "date_desc" : "date";
-
-            var bookings = _context.Booking
-                .Include(b => b.Event)
-                .Include(b => b.Venue)
-                .AsQueryable();
-
-            if (!String.IsNullOrEmpty(search))
-            {
-                bookings = bookings.Where(b => 
-                b.Event.EventName.Contains(search) || 
-                b.Venue.VenueName.Contains(search));
-            }
-
-            //Sorting logic
-            bookings = sortOrder switch
-            {
-                "event_desc" => bookings.OrderByDescending(b => b.Event.EventName),
-                "date" => bookings.OrderBy(b => b.BookingDate),
-                "date_desc" => bookings.OrderByDescending(b => b.BookingDate),
-                _ => bookings.OrderBy(b => b.Event.EventName)
-            };
-
-            // Pagination logic
-            var count = await bookings.CountAsync();
-            var items = await bookings.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-
-            ViewBag.TotalPages = (int)Math.Ceiling((double)count / pageSize);
-            ViewBag.CurrentPage = page;
-
-            return View(items);
-        }
+       
         public IActionResult Manage(string? search, string sortOrder, int page = 1)
         {
-            var bookings = _context.Booking.AsQueryable();
+            var bookings = _context.Booking
+                .Include(b => b.Event)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
                 bookings = bookings.Where(b => b.BookingId.ToString().Contains(search) ||
-                                               b.Event.EventName.Contains(search));
+                                               (b.Event != null && b.Event.EventName.Contains(search)) ||
+                                               (b.Venue != null && b.Venue.VenueName.Contains(search)) ||
+                                               (b.Venue != null && b.Venue.Location.Contains(search)));
+
+
+
             }
 
-            // Sorting logic (example)
+            // Sorting logic 
             switch (sortOrder)
             {
                 case "EventName":
-                    bookings = bookings.OrderBy(b => b.Event.EventName);
+                    bookings = bookings.OrderBy(b => b.Event != null ? b.Event.EventName : string.Empty);
                     break;
                 case "Date":
                     bookings = bookings.OrderBy(b => b.BookingDate);
+                    break;
+                case "VenueName":
+                    bookings = bookings.OrderBy(b => b.Venue != null ? b.Venue.VenueName : string.Empty);
+                    break;
+                case "Location":
+                    bookings = bookings.OrderBy(b => b.Venue != null ? b.Venue.Location : string.Empty);
                     break;
                 default:
                     bookings = bookings.OrderBy(b => b.BookingId);
@@ -256,7 +237,18 @@ namespace EventEase.Controllers
             var viewModel = new ManageBookingsViewModel
             {
                 Search = search,
-                Bookings = paginatedBookings
+                Bookings = paginatedBookings.Select(b => new Booking
+                {
+                    BookingId = b.BookingId,
+                    Event = b.Event,
+                    BookingDate = b.BookingDate,
+                    Venue = b.Venue,
+                    
+
+
+
+                }).ToList()
+
             };
 
             ViewBag.TotalPages = (int)Math.Ceiling(bookings.Count() / (double)pageSize);

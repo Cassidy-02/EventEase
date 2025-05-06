@@ -8,30 +8,42 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace EventEase.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    
     public class EventController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<EventController> _logger;
 
         public EventController(ApplicationDbContext context)
         {
             _context = context;
-            _logger = context.GetService<ILogger<EventController>>();
+
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var events = _context.Event
+            var events = await _context.Event
                 .Include(e => e.Venue)
-                .ToList();
-            return View(events);
-        }
+                .ToListAsync();
 
+            return View(events);
+            
+        }
+        [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.VenueId = GetVenuesSelectList();
-            return View();
+            var eventModel = new Event
+            {
+                Venue = new Venue(),
+
+                Venues = _context.Venue
+                    .Select(v => new SelectListItem
+                    {
+                        Value = v.VenueId.ToString(),
+                        Text = v.VenueName
+                    })
+                    .ToList()
+            };
+            return View(eventModel);
         }
 
         [HttpPost]
@@ -40,60 +52,95 @@ namespace EventEase.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(evt);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                
+                try
+                {
+                    _context.Add(evt);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
+                }
             }
-            ViewBag.VenueId = GetVenuesSelectList(evt.VenueId);
-            return View(evt);
-        }
+           evt.Venues = _context.Venue 
+                .Select(v => new SelectListItem
+                {
+                    Value = v.VenueId.ToString(),
+                    Text = v.VenueName
+                }).ToList();
 
+            return View(evt);
+
+        }
+        
+
+        [HttpGet]
         public IActionResult Edit(int id)
         {
-            var eventModel = _context.Event.Include(e => e.Venue).FirstOrDefault(e => e.EventId == id);
-            if (eventModel == null)
+            var evt = _context.Event
+               
+               .FirstOrDefault(b => b.EventId == id);
+
+            if (evt == null)
             {
                 return NotFound();
             }
-            eventModel.Venues = _context.Venue
-                .Select(v => new SelectListItem
+
+            // Corrected the dropdown data to use Venue instead of Event  
+            evt.Venues = _context.Venue.Select(v => new SelectListItem
             {
                 Value = v.VenueId.ToString(),
                 Text = v.VenueName
             }).ToList();
 
-            return View(eventModel);
+            return View(evt);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Event evt)
+        public async Task<IActionResult> Edit(Event evt)
         {
-            if (id != evt.EventId) return NotFound();
-
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(evt);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction("Index");
                 }
-                catch (DbUpdateConcurrencyException ex)
+                catch (DbUpdateConcurrencyException)
                 {
-                    _logger.LogError(ex, "Concurrency error occurred while updating event with ID {EventId}", id);
-                    if (!await EventExistsAsync(evt.EventId))
+                    if (!_context.Event.Any(b => b.EventId == evt.EventId))
                         return NotFound();
+                    else
+                        throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewBag.VenueId = GetVenuesSelectList(evt.VenueId);
+
+            // Reload dropdown data in case of validation failure  
+            evt.Venues = _context.Venue.Select(v => new SelectListItem
+            {
+                Value = v.VenueId.ToString(),
+                Text = v.VenueName
+            }).ToList();
+
             return View(evt);
         }
 
         public async Task<IActionResult> Delete(int? id)
         {
-            var evt = await GetEventByIdAsync(id);
-            if (evt == null) return NotFound();
+            if (id == null)
+                return NotFound();
+
+            var evt = await _context.Event
+                .Include(e => e.Venue)
+                .FirstOrDefaultAsync(m => m.EventId == id);
+
+            if (evt == null)
+                return NotFound();
 
             return View(evt);
         }
@@ -108,32 +155,8 @@ namespace EventEase.Controllers
                 _context.Event.Remove(evt);
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool EventExists(int id)
-        {
-            return _context.Event.Any(e => e.EventId == id);
-        }
-
-        private SelectList GetVenuesSelectList(int? selectedVenueId = null)
-        {
-            return new SelectList(_context.Venue, "VenueId", "VenueName", selectedVenueId);
-        }
-
-        private async Task<Event?> GetEventByIdAsync(int? id)
-        {
-            if (id == null) return null;
-            return await _context.Event
-                .Include(e => e.Venue)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.EventId == id);
-        }
-
-        private async Task<bool> EventExistsAsync(int id)
-        {
-            return await _context.Event.AnyAsync(e => e.EventId == id);
+                return RedirectToAction(nameof(Index));
+     
         }
     }
-   
 }

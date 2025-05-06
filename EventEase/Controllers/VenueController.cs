@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventEase.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    
     public class VenueController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,7 +23,15 @@ namespace EventEase.Controllers
 
         public async Task<IActionResult> Display()
         {
-            var venues = await _context.Venue.ToListAsync(); // Retrieve all venues asynchronously
+            var venues = await _context.Venue
+                .Select(v => new Venue
+                {
+                    VenueId = v.VenueId,
+                    VenueName = v.VenueName ?? "Unknown", // Default value for null
+                    Location = v.Location ?? "Not specified", // Default value for null
+                    Capacity = v.Capacity,
+                    ImageUrl = v.ImageUrl ?? string.Empty // Default value for null
+                }).ToListAsync(); // Retrieve all venues asynchronously
             return View(venues);
         }
 
@@ -35,17 +43,19 @@ namespace EventEase.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VenueId, VenueName, Location, Capacity, ImageUrl")] Venue venue, IFormFile? imageFile)
+        public async Task<IActionResult> Create([Bind("VenueId, VenueName, Location, Capacity")] Venue venue, IFormFile? imageFile)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(venue); // Redisplay the form if validation fails
-            }
+            
 
             if (imageFile != null)
             {
                 using var stream = imageFile.OpenReadStream();
                 venue.ImageUrl = await _blobService.UploadFileAsync(stream, imageFile.FileName);
+            }
+
+            if (ModelState.IsValid)
+            {
+                return View(venue); // Redisplay the form if validation fails
             }
 
             _context.Venue.Add(venue);
@@ -73,7 +83,7 @@ namespace EventEase.Controllers
                 return NotFound();
             }
 
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 return View(venue);
             }
@@ -131,9 +141,6 @@ namespace EventEase.Controllers
             return RedirectToAction(nameof(Display)); // Redirect to the Display action
         }
 
-        private bool VenueExists(int id)
-        {
-            return _context.Venue.Any(e => e.VenueId == id);
-        }
+      
     }
 }
