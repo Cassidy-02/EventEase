@@ -2,7 +2,7 @@
 {
     public class ManageBookingsViewModel
     {
-        public string? Search { get; set; }
-        public IEnumerable<EventEase.Models.Booking> Bookings { get; set; } = Enumerable.Empty<EventEase.Models.Booking>();
+        public string? Search { get; set; } //Primary key
+        public IEnumerable<EventEase.Models.Booking> Bookings { get; set; } = [];
     }
 }

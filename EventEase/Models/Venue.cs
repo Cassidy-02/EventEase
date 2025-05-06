@@ -8,8 +8,8 @@ public class Venue
         public int VenueId { get; set; }
 
         [Required(ErrorMessage = "Venue name is required.")]
-        [StringLength(100, ErrorMessage = "Venue name cannot exceed 100 characters.")]
-        public string VenueName { get; set; }
+        [StringLength(255, ErrorMessage = "Venue name cannot exceed 100 characters.")]
+        public  string VenueName { get; set; }
 
         [Required(ErrorMessage = "Location is required.")]
         [StringLength(200, ErrorMessage = "Location cannot exceed 200 characters.")]
@@ -20,7 +20,7 @@ public class Venue
         public int Capacity { get; set; }
 
         [Required(ErrorMessage = "An image is required.")]
-        public string ImageUrl { get; set; }
+        public  string ImageUrl { get; set; }
 
         public ICollection<Event> Events { get; set; } = new List<Event>();
     }

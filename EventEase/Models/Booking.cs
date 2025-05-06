@@ -11,15 +11,17 @@ namespace EventEase.Models
         public int VenueId { get; set; }
         [Required(ErrorMessage = "Booking date is required.")]
         public DateTime? BookingDate { get; set; }
-        public required Event Event { get; set; }
-        public required Venue Venue { get; set; }
-       
+        public  Event? Event { get; set; } 
+        public  Venue? Venue { get; set; } 
 
-        [NotMapped]
+
+
         // Add these properties for dropdown lists
-        public List<SelectListItem>? Events { get; set; }
         [NotMapped]
-        public List<SelectListItem>? Venues { get; set; }
+        public List<SelectListItem> Events { get; set; } = new();
+        [NotMapped]
+        public List<SelectListItem> Venues { get; set; } = new();
+        
     }
 
 }
