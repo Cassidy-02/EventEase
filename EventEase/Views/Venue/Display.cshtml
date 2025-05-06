@@ -7,10 +7,6 @@
 
 <h1>Venues</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New Venue</a>
-
-</p>
 
 <table class="table table-bordered">
     <thead>
@@ -67,3 +63,4 @@
         }
     </tbody>
 </table>
+<a href="@Url.Action("Create", "Venue")" class="btn btn-success">Create New Venue</a>

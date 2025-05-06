@@ -9,6 +9,7 @@
 @using (Html.BeginForm("Edit", "Venue", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
+   
 
     <div class="form-group">
         @Html.LabelFor(m => m.VenueName, "Venue Name")
