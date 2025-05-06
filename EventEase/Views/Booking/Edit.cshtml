@@ -9,6 +9,7 @@
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.BookingId)
 
     <div class="form-group">
         @Html.LabelFor(m => m.BookingDate)
@@ -17,13 +18,14 @@
 
     <div class="form-group">
         @Html.LabelFor(m => m.EventId)
-        @Html.DropDownListFor(m => m.EventId, new SelectList(ViewBag.EventList, "EventId", "EventName"), "Select Event", new { @class = "form-control" })
+        @Html.DropDownListFor(m => m.EventId, Model.Events, "Select Event", new { @class = "form-control" })
     </div>
 
     <div class="form-group">
         @Html.LabelFor(m => m.VenueId)
-        @Html.DropDownListFor(m => m.VenueId, new SelectList(ViewBag.VenueList, "VenueId", "VenueName"), "Select Venue", new { @class = "form-control" })
+        @Html.DropDownListFor(m => m.VenueId, Model.Venues, "Select Venue", new { @class = "form-control" })
     </div>
 
     <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="@Url.Action("Index", "Booking")" class="btn btn-secondary">Cancel</a>
 }
