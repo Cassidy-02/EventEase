@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using EventEase.ViewModels;
+
 
 namespace EventEase.Data
 {
@@ -11,14 +13,13 @@ namespace EventEase.Data
         public DbSet<Venue> Venue { get; set; }
         public DbSet<Event> Event { get; set; }
         public DbSet<Booking> Booking { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure IdentityUserLogin<string> primary key
-            modelBuilder.Entity<IdentityUserLogin<string>>()
-                .HasKey(login => new { login.LoginProvider, login.ProviderKey });
+           
 
             // Configure Event-Venue relationship
             modelBuilder.Entity<Event>()
