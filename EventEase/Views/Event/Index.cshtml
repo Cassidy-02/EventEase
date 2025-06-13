@@ -12,6 +12,7 @@
 
             <th>Event Name</th>
             <th>Event Date</th>
+            <th>Event Type</th>
             <th>Description</th>
             <th>Venue</th>
             
@@ -24,11 +25,9 @@
 
                     <td>@eventItem.EventName</td>
                     <td>@eventItem.EventDate.ToString("yyyy-MM-dd")</td>
+                    <td>@eventItem.EventType?.EventTypeName</td>
                     <td>@eventItem.Description</td>
                     <td>@eventItem.Venue?.VenueName</td>
-                    <td>
-                        <select asp-for="@eventItem.VenueId" asp-items="@eventItem.Venues" class="form-control"></select>
-                    </td>
                     <td>
                         @Html.ActionLink("Edit", "Edit", new { id = eventItem.EventId }, new { @class = "btn btn-primary btn-sm" }) |
                         @Html.ActionLink("Delete", "Delete", new { id = eventItem.EventId }, new { @class = "btn btn-danger btn-sm" })

@@ -13,6 +13,7 @@
             <th>Event</th>
             <th>Venue</th>
             <th>Booking Date</th>
+            <th>Event Type</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -27,6 +28,7 @@
                     <td>@booking.Event?.EventName</td>
                     <td>@booking.Venue?.VenueName</td>
                     <td>@booking.BookingDate?.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@booking.Event?.EventType</td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@booking.BookingId" class="btn btn-primary btn-sm" aria-label="Edit Booking">Edit</a> |
                         <a asp-action="Delete" asp-route-id="@booking.BookingId" class="btn btn-danger btn-sm" aria-label="Delete Booking">Delete</a>

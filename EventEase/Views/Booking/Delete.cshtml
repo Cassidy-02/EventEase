@@ -9,6 +9,7 @@
 <p>Are you sure you want to delete this booking?</p>
 <p>
     <strong>Event:</strong> @Model.Event.EventName <br />
+    <strong>Event Type:</strong> @Model.EventType.EventTypeName <br />
     <strong>Venue:</strong> @Model.Venue.VenueName <br />
     <strong>Date:</strong> @(Model.BookingDate?.ToString("yyyy-MM-dd HH:mm") ?? "N/A")
 </p>

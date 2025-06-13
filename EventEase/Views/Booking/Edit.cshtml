@@ -22,6 +22,11 @@
     </div>
 
     <div class="form-group">
+        @Html.LabelFor(m => m.EventTypeId)
+        @Html.DropDownListFor(m => m.EventTypeId, Model.EventTypes, "Select Event Type", new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
         @Html.LabelFor(m => m.VenueId)
         @Html.DropDownListFor(m => m.VenueId, Model.Venues, "Select Venue", new { @class = "form-control" })
     </div>

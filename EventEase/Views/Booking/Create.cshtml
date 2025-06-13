@@ -26,6 +26,12 @@
     </div>
 
     <div class="form-group mb-3">
+        @Html.LabelFor(m => m.EventType, "Event Type", new { @class = "form-label" })
+        @Html.DropDownListFor(m => m.EventTypeId, Model.EventTypes, "Select Event Type", new { @class = "form-control", placeholder = "Enter event type", aria_describedby = "EventTypeError" })
+        @Html.ValidationMessageFor(m => m.EventType, "", new { @id = "EventTypeError", @class = "text-danger" })
+    </div>
+
+    <div class="form-group mb-3">
         @Html.LabelFor(m => m.VenueId, "Venue", new { @class = "form-label" })
         @Html.DropDownListFor(m => m.VenueId, Model.Venues, "Select Venue", new { @class = "form-control", aria_describedby = "VenueIdError" })
         @Html.ValidationMessageFor(m => m.VenueId, "", new { @id = "VenueIdError", @class = "text-danger" })
