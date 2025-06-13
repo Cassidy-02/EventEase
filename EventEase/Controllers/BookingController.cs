@@ -1,9 +1,11 @@
-﻿using EventEase.Data;
+﻿using DocumentFormat.OpenXml.Features;
+using EventEase.Data;
 using EventEase.Models;
 using EventEase.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using EventType = EventEase.Models.EventType;
 
 namespace EventEase.Controllers
 {
@@ -23,6 +25,7 @@ namespace EventEase.Controllers
             var bookings = await _context.Booking
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
+                .Include(b => b.EventType)
                 .ToListAsync();
 
             return View(bookings);
@@ -38,6 +41,7 @@ namespace EventEase.Controllers
              {
                  Event = new Event(),
                  Venue = new Venue(),
+                 EventType = new EventType(),
 
                  Events = _context.Event.Select(e => new SelectListItem
                  {
@@ -48,7 +52,12 @@ namespace EventEase.Controllers
                  {
                      Value = v.VenueId.ToString(),
                      Text = v.VenueName
-                 }).ToList()
+                 }).ToList(),
+                    EventTypes = _context.EventType.Select(et => new SelectListItem
+                    {
+                        Value = et.EventTypeId.ToString(),
+                        Text = et.EventTypeName
+                    }).ToList() // New dropdown for EventType
              };
 
              return View(booking);
@@ -90,6 +99,12 @@ namespace EventEase.Controllers
                 Value = v.VenueId.ToString(),
                 Text = v.VenueName
             }).ToList();
+            
+            booking.EventTypes = _context.EventType.Select(et => new SelectListItem
+            {
+                Value = et.EventTypeId.ToString(),
+                Text = et.EventTypeName
+            }).ToList(); // New dropdown for EventType
 
             return View(booking);
         }
@@ -119,6 +134,12 @@ namespace EventEase.Controllers
                 Value = v.VenueId.ToString(),
                 Text = v.VenueName
             }).ToList();
+
+            booking.EventTypes = _context.EventType.Select(et => new SelectListItem
+            {
+                Value = et.EventTypeId.ToString(),
+                Text = et.EventTypeName
+            }).ToList(); // New dropdown for EventType
 
 
             return View(booking);
@@ -160,6 +181,12 @@ namespace EventEase.Controllers
                 Text = v.VenueName
             }).ToList();
 
+            booking.EventTypes = _context.EventType.Select(et => new SelectListItem
+            {
+                Value = et.EventTypeId.ToString(),
+                Text = et.EventTypeName
+            }).ToList(); // New dropdown for EventType
+
             return View(booking);
         }
 
@@ -169,7 +196,8 @@ namespace EventEase.Controllers
         {
             if (id == null) return NotFound();
 
-            var booking = await _context.Booking.Include(b => b.Event).Include(b => b.Venue).FirstOrDefaultAsync(m => m.BookingId == id);
+            var booking = await _context.Booking.Include(b => b.Event).Include(b => b.EventType)
+            .Include(b => b.Venue).FirstOrDefaultAsync(m => m.BookingId == id);
             if (booking == null) return NotFound();
 
             return View(booking);
@@ -191,26 +219,51 @@ namespace EventEase.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        //Booking Management
-       
-        public IActionResult Manage(string? search, string sortOrder, int page = 1)
+        
+        public IActionResult Manage(string? search, string sortOrder, int page = 1, int? evenTypeId = null, DateTime? fromDate = null,
+                             DateTime? toDate = null, bool? isAvailable = null)
         {
             var bookings = _context.Booking
                 .Include(b => b.Event)
+                .ThenInclude(b => b.EventType)
+                .Include(b => b.Event.Venue) 
                 .AsQueryable();
 
+            // Search by keyword
             if (!string.IsNullOrEmpty(search))
             {
                 bookings = bookings.Where(b => b.BookingId.ToString().Contains(search) ||
                                                (b.Event != null && b.Event.EventName.Contains(search)) ||
+                                               (b.Event != null && b.Event.EventType != null && b.Event.EventType.EventTypeName.Contains(search)) || // Added null checks
                                                (b.Venue != null && b.Venue.VenueName.Contains(search)) ||
                                                (b.Venue != null && b.Venue.Location.Contains(search)));
-
-
-
             }
 
-            // Sorting logic 
+            // Filter by EventTypeId
+            if (evenTypeId.HasValue && evenTypeId.Value > 0)
+            {
+                bookings = bookings.Where(b => b.Event != null && b.Event.EventTypeId == evenTypeId.Value); // Added null check
+            }
+
+            if (fromDate.HasValue && toDate.HasValue)
+            {
+                bookings = bookings.Where(b => b.BookingDate.HasValue && b.BookingDate.Value >= fromDate.Value && b.BookingDate.Value <= toDate.Value); // Added null check
+            }
+            else if (fromDate.HasValue)
+            {
+                bookings = bookings.Where(b => b.BookingDate.HasValue && b.BookingDate.Value >= fromDate.Value); // Added null check
+            }
+            else if (toDate.HasValue)
+            {
+                bookings = bookings.Where(b => b.BookingDate.HasValue && b.BookingDate.Value <= toDate.Value); // Added null check
+            }
+
+            if (isAvailable.HasValue)
+            {
+                bookings = bookings.Where(b => b.Venue != null && b.Venue.IsAvailable == isAvailable.Value); // Added null check
+            }
+
+            // Sorting logic
             switch (sortOrder)
             {
                 case "EventName":
@@ -232,7 +285,10 @@ namespace EventEase.Controllers
 
             // Pagination logic
             int pageSize = 10;
-            var paginatedBookings = bookings.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var paginatedBookings = bookings
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             var viewModel = new ManageBookingsViewModel
             {
@@ -243,12 +299,15 @@ namespace EventEase.Controllers
                     Event = b.Event,
                     BookingDate = b.BookingDate,
                     Venue = b.Venue,
-                    
-
-
-
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    IsAvailable = isAvailable,
+                    EventTypes = _context.EventType.Select(et => new SelectListItem
+                    {
+                        Value = et.EventTypeId.ToString(),
+                        Text = et.EventTypeName
+                    }).ToList(),
                 }).ToList()
-
             };
 
             ViewBag.TotalPages = (int)Math.Ceiling(bookings.Count() / (double)pageSize);

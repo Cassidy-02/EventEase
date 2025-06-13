@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace EventEase.Controllers
 {
-    
+
     public class EventController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,10 +23,11 @@ namespace EventEase.Controllers
         {
             var events = await _context.Event
                 .Include(e => e.Venue)
+                .Include(e => e.EventType)
                 .ToListAsync();
 
             return View(events);
-            
+
         }
         [HttpGet]
         public IActionResult Create()
@@ -34,6 +35,7 @@ namespace EventEase.Controllers
             var eventModel = new Event
             {
                 Venue = new Venue(),
+               
 
                 Venues = _context.Venue
                     .Select(v => new SelectListItem
@@ -41,7 +43,18 @@ namespace EventEase.Controllers
                         Value = v.VenueId.ToString(),
                         Text = v.VenueName
                     })
+                    .ToList(),
+
+                EventType = new EventType(),
+
+                EventTypes = _context.EventType
+                    .Select(et => new SelectListItem
+                    {
+                        Value = et.EventTypeId.ToString(),
+                        Text = et.EventTypeName
+                    })
                     .ToList()
+
             };
             return View(eventModel);
         }
@@ -52,36 +65,37 @@ namespace EventEase.Controllers
         {
             if (ModelState.IsValid)
             {
-                
-                try
-                {
+
+               
                     _context.Add(evt);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
-                }
+                
+               
             }
-           evt.Venues = _context.Venue 
-                .Select(v => new SelectListItem
+            evt.Venues = _context.Venue
+                 .Select(v => new SelectListItem
+                 {
+                     Value = v.VenueId.ToString(),
+                     Text = v.VenueName
+                 }).ToList();
+            evt.EventTypes = _context.EventType
+                .Select(e => new SelectListItem
                 {
-                    Value = v.VenueId.ToString(),
-                    Text = v.VenueName
+                    Value = e.EventTypeId.ToString(),
+                    Text = e.EventTypeName
                 }).ToList();
 
             return View(evt);
 
         }
-        
+
 
         [HttpGet]
         public IActionResult Edit(int id)
         {
             var evt = _context.Event
-               
+
                .FirstOrDefault(b => b.EventId == id);
 
             if (evt == null)
@@ -155,8 +169,11 @@ namespace EventEase.Controllers
                 _context.Event.Remove(evt);
                 await _context.SaveChangesAsync();
             }
-                return RedirectToAction(nameof(Index));
-     
+            return RedirectToAction(nameof(Index));
+
         }
+
+        
+        
     }
 }

@@ -27,10 +27,11 @@ namespace EventEase.Controllers
                 .Select(v => new Venue
                 {
                     VenueId = v.VenueId,
-                    VenueName = v.VenueName ?? "Unknown", // Default value for null
-                    Location = v.Location ?? "Not specified", // Default value for null
+                    VenueName = v.VenueName, 
+                    Location = v.Location, 
                     Capacity = v.Capacity,
-                    ImageUrl = v.ImageUrl ?? string.Empty // Default value for null
+                    ImageUrl = v.ImageUrl ?? string.Empty, // Default value for null
+                   
                 }).ToListAsync(); // Retrieve all venues asynchronously
             return View(venues);
         }
