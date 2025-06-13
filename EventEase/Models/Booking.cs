@@ -13,6 +13,11 @@ namespace EventEase.Models
         public DateTime? BookingDate { get; set; }
         public  Event? Event { get; set; } 
         public  Venue? Venue { get; set; } 
+        public int EventTypeId { get; set; } // New property for EventType
+        public EventType? EventType { get; set; } // Navigation property for EventType
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+        public bool? IsAvailable { get; set; } // New property to track availability
 
 
 
@@ -21,7 +26,9 @@ namespace EventEase.Models
         public List<SelectListItem> Events { get; set; } = new();
         [NotMapped]
         public List<SelectListItem> Venues { get; set; } = new();
-        
+        [NotMapped]
+        public List<SelectListItem> EventTypes { get; set; } = new(); //New model for EventType dropdown
+
     }
 
 }
