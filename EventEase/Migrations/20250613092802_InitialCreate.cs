@@ -51,12 +51,26 @@ namespace EventEase.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EventType",
+                columns: table => new
+                {
+                    EventTypeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EventTypeName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EventType", x => x.EventTypeId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Venue",
                 columns: table => new
                 {
                     VenueId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    VenueName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    VenueName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
                     Location = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -181,11 +195,17 @@ namespace EventEase.Migrations
                     EventName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EventDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    VenueId = table.Column<int>(type: "int", nullable: true)
+                    VenueId = table.Column<int>(type: "int", nullable: true),
+                    EventTypeId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Event", x => x.EventId);
+                    table.ForeignKey(
+                        name: "FK_Event_EventType_EventTypeId",
+                        column: x => x.EventTypeId,
+                        principalTable: "EventType",
+                        principalColumn: "EventTypeId");
                     table.ForeignKey(
                         name: "FK_Event_Venue_VenueId",
                         column: x => x.VenueId,
@@ -202,11 +222,21 @@ namespace EventEase.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EventId = table.Column<int>(type: "int", nullable: false),
                     VenueId = table.Column<int>(type: "int", nullable: false),
-                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EventTypeId = table.Column<int>(type: "int", nullable: false),
+                    FromDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ToDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Booking", x => x.BookingId);
+                    table.ForeignKey(
+                        name: "FK_Booking_EventType_EventTypeId",
+                        column: x => x.EventTypeId,
+                        principalTable: "EventType",
+                        principalColumn: "EventTypeId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Booking_Event_EventId",
                         column: x => x.EventId,
@@ -266,9 +296,19 @@ namespace EventEase.Migrations
                 column: "EventId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Booking_EventTypeId",
+                table: "Booking",
+                column: "EventTypeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Booking_VenueId",
                 table: "Booking",
                 column: "VenueId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Event_EventTypeId",
+                table: "Event",
+                column: "EventTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Event_VenueId",
@@ -305,6 +345,9 @@ namespace EventEase.Migrations
 
             migrationBuilder.DropTable(
                 name: "Event");
+
+            migrationBuilder.DropTable(
+                name: "EventType");
 
             migrationBuilder.DropTable(
                 name: "Venue");
